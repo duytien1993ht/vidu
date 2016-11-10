@@ -1,6 +1,20 @@
-{
-    "name" : { "first" : "Tien", "last" : "Nguyen Duy" },
-    "gender" : "Falle",
-    "verified" : true,
-    "userImage" : "Rm9vYmFyIQ=="
-}
+[
+  {
+    "id":1,
+    "username":"duytien",
+    "password":"tien123",
+    "role":"1"
+  },
+  {
+    "id":1,
+    "username":"ngocthinh",
+    "password":"thinh123",
+    "role":"2"
+  },
+  {
+    "id":1,
+    "username":"vantrung",
+    "password":"trung123",
+    "role":"1"
+  }
+]
