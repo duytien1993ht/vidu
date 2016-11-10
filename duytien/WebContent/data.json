@@ -6,15 +6,15 @@
     "role":"1"
   },
   {
-    "id":1,
+    "id":2,
     "username":"ngocthinh",
     "password":"thinh123",
     "role":"2"
   },
   {
-    "id":1,
+    "id":3,
     "username":"vantrung",
     "password":"trung123",
-    "role":"1"
+    "role":"2"
   }
 ]
