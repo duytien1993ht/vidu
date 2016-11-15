@@ -13,5 +13,18 @@
 <body>
      <div id="loading">Loading</div>
      <div id="result"></div>
+     <script type="text/javascript">
+      $(document).ready(function(){
+    	  $('#loading').click(function(){
+    		  $.getJSON( "https://raw.githubusercontent.com/duytien1993ht/vidu/master/duytien/WebContent/data.json", function( data ) {
+    			  var items = [];
+    			  $.each( data, function( key, val ) {
+    			    items.push( "<li id='" + key + "'>" + val + "</li>" );
+    			  });
+    			  
+    			});
+    	  });
+      });
+    </script>
 </body>
 </html>
