@@ -3,14 +3,26 @@
     "tennhaxe":"Nhà xe big C Hùng Vương",
     "chunhaxe":"Big C company",
     "diachi":"85 Hùng Vương, Hải Châu",
-    "giave":"2000 VNĐ",
-    "tinhtrang":"20/500"
+    "giave":{
+      "truoc":"10000",
+      "sau":"15000",
+      "quadem":"30000"
+    },
+    "tinhtrang":"20/500",
+    "kinhdo":"30/100",
+    "vido":"45/1000"
   },
   "2":{
     "tennhaxe":"Nhà xe VNM Hòa Khánh",
     "chunhaxe":"Vinamilk company",
     "diachi":"255 Tôn Đức Thắng,Hòa Khánh, Liên Chiểu",
-    "giave":"3000 VNĐ",
-    "tinhtrang":"30/1000"
+    "giave":{
+      "truoc":"10000",
+      "sau":"15000",
+      "quadem":"30000"
+    },
+    "tinhtrang":"30/1000",
+    "kinhdo":"30/1000",
+    "vido":"30/1000"
   }
 }
