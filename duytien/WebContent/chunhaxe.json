@@ -2,24 +2,32 @@
   "1":{
     "tencongtydaidien":"Nhà xe big C",
     "tennguoidaidien":"Nguyễn Văn Nam",
+    "diachi":"255/8 Hòa Khánh, quận Liên Chiểu",
+    "mahopdong":"Con1278",
     "sodienthoai":"0956325684",
     "email":"vannam123@gmail.com"
   },
   "2":{
     "tencongtydaidien":"Nhà xe Framgia",
     "tennguoidaidien":"Nguyễn Văn Bình",
+    "diachi":"25/6 Hùng Vương, quận Hải Châu",
+    "mahopdong":"Con3423",
     "sodienthoai":"0968236486",
     "email":"vanbinh456@gmail.com"
   },
  "3":{
     "tencongtydaidien":"Nhà xe Compark",
     "tennguoidaidien":"Nguyễn Thị Mai",
+    "diachi":"30/6 Điện Biên Phủ",
+    "mahopdong":"Con4634",
     "sodienthoai":"0122456382",
     "email":"mainguyen@gmail.com"
   },
  "4":{
     "tencongtydaidien":"Nhà xe Hòa Khánh Bắc",
     "tennguoidaidien":"Trần Văn Thông",
+    "diachi":"55/7 Ngũ Hành Sơn",
+    "mahopdong":"Con8423",
     "sodienthoai":"0648265398",
     "email":"vanthong@gmail.com"
   }
