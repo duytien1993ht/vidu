@@ -1,14 +1,17 @@
-{
-  "1":{
+[
+  {
+    "id":1,
     "masonv":"10213",
     "matkhau":"nhanvien1"
   },
-  "2":{
+  {
+    "id":2,
     "masonv":"duytien",
     "matkhau":"nhanvien2"
   },
-  "3":{
+  {
+     "id":3,
     "masonv":"chanqua",
     "matkhau":"nhanvien3"
   }
-}
+]
