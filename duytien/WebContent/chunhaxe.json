@@ -1,34 +1,37 @@
-{
-  "1":{
-    "tencongtydaidien":"Nhà xe big C",
-    "tennguoidaidien":"Nguyễn Văn Nam",
-    "diachi":"255/8 Hòa Khánh, quận Liên Chiểu",
-    "mahopdong":"Con1278",
-    "sodienthoai":"0956325684",
-    "email":"vannam123@gmail.com"
+[
+  {
+    "owner_id":1,
+    "presentative_name":"Trường Đại Học Bách Khoa, đại học Đà Nẵng",
+    "name":"Tran Sang",
+    "phone":"0986799731",
+    "company_address":"30 Phạm Như Xương, Liên Chiểu, Đà Nẵng"
   },
-  "2":{
-    "tencongtydaidien":"Nhà xe Framgia",
-    "tennguoidaidien":"Nguyễn Văn Bình",
-    "diachi":"25/6 Hùng Vương, quận Hải Châu",
-    "mahopdong":"Con3423",
-    "sodienthoai":"0968236486",
-    "email":"vanbinh456@gmail.com"
+  {
+    "owner_id":2,
+    "presentative_name":"Sở GD & ĐT Thành phố Đà Nẵng",
+    "name":"Lê Doãn Chánh",
+    "phone":"0957118463",
+    "company_address":"107 Lê Lợi, Hải Châu, Đà Nẵng"
   },
- "3":{
-    "tencongtydaidien":"Nhà xe Compark",
-    "tennguoidaidien":"Nguyễn Thị Mai",
-    "diachi":"30/6 Điện Biên Phủ",
-    "mahopdong":"Con4634",
-    "sodienthoai":"0122456382",
-    "email":"mainguyen@gmail.com"
+  {
+    "owner_id":3,
+    "presentative_name":"Công ty quản lý nhà chung cư TP Đà Nẵng",
+    "name":"Nguyễn Duy Tiến",
+    "phone":"0912640403",
+    "company_address":"Lê Đình Lý, Thanh Khê, Đà Nẵng"
   },
- "4":{
-    "tencongtydaidien":"Nhà xe Hòa Khánh Bắc",
-    "tennguoidaidien":"Trần Văn Thông",
-    "diachi":"55/7 Ngũ Hành Sơn",
-    "mahopdong":"Con8423",
-    "sodienthoai":"0648265398",
-    "email":"vanthong@gmail.com"
+  {
+    "owner_id":4,
+    "presentative_name":"Công ty cổ phần Tinh Vân",
+    "name":"Trần Thanh Tâm",
+    "phone":"0877635194",
+    "company_address":"421 Điện Biên Phủ, Thanh Khê, Đà Nẵng"
+  },
+  {
+    "owner_id":5,
+    "presentative_name":"Công ty TNHH Hoàng Phúc",
+    "name":"Phạm Hồng Nguyên",
+    "phone":"09718383852",
+    "company_address":"118 Tống Phước Phổ, Hải Châu"
   }
-}
+]
