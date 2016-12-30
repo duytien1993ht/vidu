@@ -708,3 +708,6 @@ ds.password=root
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.9</version>
 		</dependency>
+-------------------------------------------------------------------------------------------------------------------------
+
+https://us2.proxysite.com/process.php?d=joV9tBmIEllcicLRUhncnMMJIXJP2zog9pT4yD%2BEsvXrE2SuJXovCm5Z5Res3vqfFFbw1iEqmLwBrXiGtcSE6210LTvmWZe%2BQdOHAyoD&b=2
