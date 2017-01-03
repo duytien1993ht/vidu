@@ -742,7 +742,7 @@ private Properties getHibernateProperties() {
 
 ---------------------------------------------------------------------------------------------------------------------------------
 	
-	package duy.tien.dao;
+	package huynhquang.dao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -753,23 +753,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import duy.tien.entity.HocVien;
 
+import huynhquang.entities.HocVien;
 
 @Transactional
 @Repository
 public class HocVienDao {
 	@Autowired
 	private SessionFactory sessionFactory;
-    
-	@Autowired
+
 	public HocVienDao(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<HocVien> getAllUser() {
-		System.out.println("code den day");
 		List<HocVien> list = new ArrayList<HocVien>();
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HocVien.class);
 		list = criteria.list();
@@ -782,4 +780,86 @@ public class HocVienDao {
 		
 	}
 
+	public void insertHocvien(HocVien hocvien) {
+		sessionFactory.getCurrentSession().saveOrUpdate(hocvien);
+	}
+
+	public HocVien getEdit(String id) {
+		return (HocVien) sessionFactory.getCurrentSession().get(HocVien.class, id);
+		
+	}
+
 }
+
+-----------------------------------------------------------------------------
+	
+	package huynhquang.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import huynhquang.dao.HocVienDao;
+import huynhquang.entities.HocVien;
+
+@Controller
+public class MainController {
+	@Autowired
+	private HocVienDao  hocviendao;
+	
+	
+	@RequestMapping(value="/")
+	public String Home(){
+		return "redirect:/index";
+	}
+	
+
+	
+	@RequestMapping(value="/index", method= RequestMethod.GET)
+	public String Test(Model model){
+		List<HocVien> list = hocviendao.getAllUser();
+		model.addAttribute("list", list);
+		return"index";
+	}
+	
+	
+	@RequestMapping(value="/del", method=RequestMethod.GET)
+	public String DelUser(@RequestParam(name="id_hv", required=false)String userId, HocVien hocvien, ModelMap model) {
+	//	HocVien hocvien = new HocVien();
+		hocvien.setId_hv(userId);
+		hocviendao.deleteUser(hocvien);
+		return "redirect:/index";
+	}
+	
+	
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	public String saveOrUpdateUser(@ModelAttribute(name="userForm") HocVien hocvien,
+			BindingResult result, Model model) {
+		hocviendao.insertHocvien(hocvien);
+		return"redirect:/index";
+		//...
+	}
+	
+	
+	@RequestMapping(value="/edit", method=RequestMethod.GET)
+	public String EditHocVien(@RequestParam(name="id_hv", required=false)String userId, HocVien hocvien, ModelMap model) {
+	//	HocVien hocvien new HocVien();
+		hocvien.setId_hv(userId);
+		HocVien hocviens= hocviendao.getEdit(userId);
+		System.out.println("in hoc vien: "+hocviens);
+		
+		return "redirect:/index";
+	}
+	
+	
+
+}
+
