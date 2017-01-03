@@ -711,3 +711,75 @@ ds.password=root
 -------------------------------------------------------------------------------------------------------------------------
 
 https://us2.proxysite.com/process.php?d=joV9tBmIEllcicLRUhncnMMJIXJP2zog9pT4yD%2BEsvXrE2SuJXovCm5Z5Res3vqfFFbw1iEqmLwBrXiGtcSE6210LTvmWZe%2BQdOHAyoD&b=2
+
+----------------------------------------------------------------------------------------------------------------------------
+private Properties getHibernateProperties() {
+    	Properties properties = new Properties();
+    	properties.put("hibernate.show_sql", "true");
+    	properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+    	return properties;
+    }
+	
+	@Autowired
+    @Bean(name = "sessionFactory")
+    public SessionFactory getSessionFactory(DataSource dataSource) {
+    	LocalSessionFactoryBuilder sessionBuilder = new LocalSessionFactoryBuilder(dataSource);
+    	sessionBuilder.addProperties(getHibernateProperties());
+    	sessionBuilder.addAnnotatedClass(HocVien.class);
+    	sessionBuilder.addAnnotatedClass(HocVienDao.class);
+    	return sessionBuilder.buildSessionFactory();
+    }
+	
+	@Autowired
+	@Bean(name = "transactionManager")
+	public HibernateTransactionManager getTransactionManager(
+			SessionFactory sessionFactory) {
+		HibernateTransactionManager transactionManager = new HibernateTransactionManager(
+				sessionFactory);
+
+		return transactionManager;
+	}
+
+---------------------------------------------------------------------------------------------------------------------------------
+	
+	package duy.tien.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import duy.tien.entity.HocVien;
+
+
+@Transactional
+@Repository
+public class HocVienDao {
+	@Autowired
+	private SessionFactory sessionFactory;
+    
+	@Autowired
+	public HocVienDao(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<HocVien> getAllUser() {
+		System.out.println("code den day");
+		List<HocVien> list = new ArrayList<HocVien>();
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(HocVien.class);
+		list = criteria.list();
+		return list;
+
+	}
+
+	public void deleteUser(HocVien hocvien) {
+		sessionFactory.getCurrentSession().delete(hocvien);
+		
+	}
+
+}
