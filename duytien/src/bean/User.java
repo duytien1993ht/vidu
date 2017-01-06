@@ -1,360 +1,713 @@
-Xử lý File Upload trong Spring MVC
-Để upload file từ client lên server ta sử dụng thư viện apache common-io và giao diện MultipartResolver của Spring.
-Example lấy từ đây http://diepviends.blogspot.com/2013/12/xu-ly-form-trong-spring-mvc.html
-Đầu tiên add các thư viện cần thiết vào
-mở file pom.xml thêm các dependency sau: 
-?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-<dependency>
-            <groupid>commons-io</groupid>
-            <artifactid>commons-io</artifactid>
-            <version>2.1</version>
-        </dependency>
-<dependency>
-            <groupid>javax</groupid>
-            <artifactid>javaee-web-api</artifactid>
-            <version>6.0</version>
-            <scope>provided</scope>
-        </dependency>
-Cấu hình bean cho dispatcher servlet
-Vào /WEB-INF/spring/appServlet/servlet-context.xml định nghĩa bean xử lý MultipartFile 
-?
-1
-2
-<beans:bean class="org.springframework.web.multipart.support.StandardServletMultipartResolver" id="multipartResolver">
-</beans:bean>
-bây giờ cấu hình cho dispatcher servlet xử lý multipart vào web.xml thêm đoạn như sau: 
-?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-<servlet>
-  <servlet-name>appServlet</servlet-name>
-  <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-  <init-param>
-   <param-name>contextConfigLocation</param-name>
-   <param-value>/WEB-INF/spring/appServlet/servlet-context.xml</param-value>
-  </init-param>
-  <load-on-startup>1</load-on-startup>
-  <multipart-config>
-   <max-file-size>5000000</max-file-size>
-  </multipart-config>
- </servlet>
-Xong việc cấu hình.
-xử lý file upload thì có 2 cách:
-Cách 1: lưu trực tiếp file vào DB, dữ liệu file được lưu trữ là kiểu binary
-Cách 2: lưu file vào một thư mục nào đó trên server và sau đó lưu trữ đường dẫn vào DB
-Cách thứ 2 thường được sử dụng đối với ứng dụng có upload image từ client
-Trong ví dụ này, ta sẽ demo cả 2 cách xử lý trên (cũng tương tự nhau)
-Ví dụ của ta sẽ lưu dữ liệu image của product ( kiểu byte) vào trường image (cách 1)
-và upload ảnh vào thư mục /resources/upload trên server sau đó lưu đường dẫn của file ảnh được upload lên server vào trường imagePath.(cách 2)
-Cụ thể Product class sẽ như sau: 
-?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-package vn.ds.store.domains;
- 
-import java.io.Serializable;
- 
-public class Product implements Serializable {
- /**
-  * 
-  */
- private static final long serialVersionUID = 1L;
- private String name;
- private String price;
- private byte[] image;
- private String imagePath;
- 
- public String getName() {
-  return name;
- }
- 
- public void setName(String name) {
-  this.name = name;
- }
- 
- public String getPrice() {
-  return price;
- }
- 
- public void setPrice(String price) {
-  this.price = price;
- }
- 
- public byte[] getImage() {
-  return image;
- }
- 
- public void setImage(byte[] image) {
-  this.image = image;
- }
- 
- public String getImagePath() {
-  return imagePath;
- }
- 
- public void setImagePath(String imagePath) {
-  this.imagePath = imagePath;
- }
-  
-}
-File createProduct.jsp sẽ được sửa như sau: 
-?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-<form:form action="${pageContext.request.contextPath}/product/save" enctype="multipart/form-data" method="post" modelattribute="product">  
-  <table>
-   <caption>create</caption>
-   <tbody>
-<tr>
-    <td>Name</td>
-    <td><form:input path="name"> <form:errors cssclass="err" path="name"></form:errors></form:input></td>
-   </tr>
-<tr>
-    <td>Price</td>
-    <td><form:input path="price"> <form:errors cssclass="err" path="price"></form:errors></form:input></td>
-   </tr>
-<tr>
-    <td>Image</td>
-    <td><input name="file" type="file"></td>
-   </tr>
-<tr>
-    <td></td>
-    <td><input type="submit" value="Submit"></td>
-   </tr>
-</tbody></table>
-</form:form>
-Chú ý thêm thuộc tính cho form tag để xử lý upload: enctype="multipart/form-data"
-file listProduct.jsp sẽ là: 
-?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-<c:foreach items="${products}" var="p" varstatus="loop">
-   </c:foreach><table>
-  <caption>List of products</caption>
-  <tbody>
-<tr>
-   <th>Name</th>
-   <th>Price</th>
-   <th>Image</th>
-   <th>imagePath</th>
-  </tr>
-<tr class="${loop.index % 2 == 0 ? 'even':'odd' }">
-    <td>${p.name}</td>
-    <td>${p.price}</td>
-    <td><img height="200" src="${pageContext.request.contextPath}/product/image" width="300"></td>
-    <td><img height="200" src="${p.imagePath}" width="300"></td>
-   </tr>
-</tbody></table>
-Bây giờ ta sẽ viết phần quan trọng nhất - controller xử lý upload ProductController.java 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>o7.planning</groupId>
+  <artifactId>ExampleHiber</artifactId>
+  <packaging>war</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>ExampleHiber Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+           <groupId>javax.servlet</groupId>
+           <artifactId>javax.servlet-api</artifactId>
+           <version>3.1.0</version>
+           <scope>provided</scope>
+       </dependency>
 
-package vn.ds.store.controllers;
- 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
- 
+       <!-- Jstl for jsp page -->
+       <!-- http://mvnrepository.com/artifact/javax.servlet/jstl -->
+       <dependency>
+           <groupId>javax.servlet</groupId>
+           <artifactId>jstl</artifactId>
+           <version>1.2</version>
+       </dependency>
+
+
+       <!-- JSP API -->
+       <!-- http://mvnrepository.com/artifact/javax.servlet.jsp/jsp-api -->
+       <dependency>
+           <groupId>javax.servlet.jsp</groupId>
+           <artifactId>jsp-api</artifactId>
+           <version>2.2</version>
+           <scope>provided</scope>
+       </dependency>
+
+       <!-- Spring dependencies -->
+       <!-- http://mvnrepository.com/artifact/org.springframework/spring-core -->
+       
+       <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>4.3.4.RELEASE</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+       <!-- http://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+       <dependency>
+           <groupId>org.springframework</groupId>
+           <artifactId>spring-webmvc</artifactId>
+           <version>4.1.4.RELEASE</version>
+       </dependency>
+
+       <!-- http://mvnrepository.com/artifact/org.springframework/spring-orm -->
+       <dependency>
+           <groupId>org.springframework</groupId>
+           <artifactId>spring-orm</artifactId>
+           <version>4.1.4.RELEASE</version>
+       </dependency>
+
+       <!-- Hibernate -->
+       <!-- http://mvnrepository.com/artifact/org.hibernate/hibernate-core -->
+       <dependency>
+           <groupId>org.hibernate</groupId>
+           <artifactId>hibernate-core</artifactId>
+           <version>4.3.8.Final</version>
+       </dependency>
+
+       <!-- http://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager -->
+       <dependency>
+           <groupId>org.hibernate</groupId>
+           <artifactId>hibernate-entitymanager</artifactId>
+           <version>4.3.8.Final</version>
+       </dependency>
+
+
+       <!-- http://mvnrepository.com/artifact/org.hibernate/hibernate-c3p0 -->
+       <dependency>
+           <groupId>org.hibernate</groupId>
+           <artifactId>hibernate-c3p0</artifactId>
+           <version>4.3.8.Final</version>
+       </dependency>
+
+
+       <!-- MySQL JDBC driver -->
+       <!-- http://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+       <dependency>
+           <groupId>mysql</groupId>
+           <artifactId>mysql-connector-java</artifactId>
+           <version>5.1.34</version>
+       </dependency>
+
+       <!-- Oracle JDBC driver -->
+       <dependency>
+           <groupId>com.oracle</groupId>
+           <artifactId>ojdbc6</artifactId>
+           <version>11.2.0.3</version>
+       </dependency>
+
+       <!-- SQLServer JDBC driver (JTDS) -->
+       <!-- http://mvnrepository.com/artifact/net.sourceforge.jtds/jtds -->
+       <dependency>
+           <groupId>net.sourceforge.jtds</groupId>
+           <artifactId>jtds</artifactId>
+           <version>1.3.1</version>
+       </dependency>
+   
+  </dependencies>
+  <build>
+    <finalName>ExampleHiber</finalName>
+  </build>
+</project>
+------------------------------------------------------------------------------------------------------------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+    http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    id="WebApp_ID" version="3.0">
+  <display-name>Archetype Created Web Application</display-name>
+</web-app>
+-------------------------------------------------------------------------------------------------------------------------
+
+package duy.tien.config;
+
+import java.util.Properties;
+
+import javax.sql.DataSource;
+
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate4.HibernateTransactionManager;
+import org.springframework.orm.hibernate4.LocalSessionFactoryBuilder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import duy.tien.dao.EmployeeDAO;
+import duy.tien.entity.Employee;
+
+@Configuration
+@ComponentScan("duy.tien.*")
+@EnableTransactionManagement
+// Load to Environment.
+@PropertySource("classpath:datasource-cfg.properties")
+public class AppConfig {
+	@Autowired
+	private Environment env;
+
+
+	@Bean(name = "viewResolver")
+	public InternalResourceViewResolver getViewResolver() {
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+		viewResolver.setPrefix("/WEB-INF/views/");
+		viewResolver.setSuffix(".jsp");
+		return viewResolver;
+	}
+
+	/*@Bean(name = "multipartResolver")
+	public MultipartResolver getMultipartResolver() {
+		CommonsMultipartResolver resover = new CommonsMultipartResolver();
+		// 1MB
+		resover.setMaxUploadSize(1 * 1024 * 1024);
+
+		return resover;
+	}*/
+
+	@Bean(name = "dataSource")
+	public DataSource getDataSource() {
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+		// Xem: datasouce-cfg.properties
+		dataSource.setDriverClassName(env.getProperty("ds.database-driver"));
+		dataSource.setUrl(env.getProperty("ds.url"));
+		dataSource.setUsername(env.getProperty("ds.username"));
+		dataSource.setPassword(env.getProperty("ds.password"));
+
+		System.out.println("## getDataSource: " + dataSource);
+
+		return dataSource;
+	}
+
+	private Properties getHibernateProperties() {
+    	Properties properties = new Properties();
+    	properties.put("hibernate.show_sql", "true");
+    	properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+    	return properties;
+    }
+	
+	@Autowired
+    @Bean(name = "sessionFactory")
+    public SessionFactory getSessionFactory(DataSource dataSource) {
+    	LocalSessionFactoryBuilder sessionBuilder = new LocalSessionFactoryBuilder(dataSource);
+    	sessionBuilder.addProperties(getHibernateProperties());
+    	sessionBuilder.addAnnotatedClass(Employee.class);
+    	sessionBuilder.addAnnotatedClass(EmployeeDAO.class);
+    	return sessionBuilder.buildSessionFactory();
+    }
+	
+	@Autowired
+	@Bean(name = "transactionManager")
+	public HibernateTransactionManager getTransactionManager(
+			SessionFactory sessionFactory) {
+		HibernateTransactionManager transactionManager = new HibernateTransactionManager(
+				sessionFactory);
+
+		return transactionManager;
+	}
+	
+}
+--------------------------------------------------------------------------------------------------------------------
+            
+  package duy.tien.config;
+
+import javax.servlet.FilterRegistration;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.servlet.DispatcherServlet;
+
+public class SpringWebAppInitializer implements WebApplicationInitializer {
+	 
+	  public void onStartup(ServletContext servletContext) throws ServletException {
+	      AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
+	      appContext.register(AppConfig.class);
+	 
+	      ServletRegistration.Dynamic dispatcher = servletContext.addServlet("SpringDispatcher",
+	              new DispatcherServlet(appContext));
+	      dispatcher.setLoadOnStartup(1);
+	      dispatcher.addMapping("/");
+	        dispatcher.setInitParameter("contextClass", appContext.getClass().getName());
+	        servletContext.addListener(new ContextLoaderListener(appContext));
+	       // UTF8 Charactor Filter.
+	       FilterRegistration.Dynamic fr = servletContext.addFilter("encodingFilter", CharacterEncodingFilter.class);
+	       fr.setInitParameter("encoding", "UTF-8");
+	       fr.setInitParameter("forceEncoding", "true");
+	       fr.addMappingForUrlPatterns(null, true, "/*");
+	  }
+}
+----------------------------------------------------------------------------------------------------------------------------
+  
+  package duy.tien.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+@Configuration
+@EnableWebMvc
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+	// Cáº¥u hÃ¬nh Ä‘á»ƒ sá»­ dá»¥ng cÃ¡c file nguá»“n tÄ©nh (html, image, ..)
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/css/**").addResourceLocations("/WEB-INF/resources/css/").setCachePeriod(31556926);
+		registry.addResourceHandler("/img/**").addResourceLocations("/WEB-INF/resources/img/").setCachePeriod(31556926);
+		registry.addResourceHandler("/js/**").addResourceLocations("/WEB-INF/resources/js/").setCachePeriod(31556926);
+		registry.addResourceHandler("/fonts/**").addResourceLocations("/WEB-INF/resources/fonts/").setCachePeriod(31556926);
+	}
+
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
+	}
+
+}
+----------------------------------------------------------------------------------------------------------------------------------
+            
+ package duy.tien.controller;
+
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
- 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
- 
-import vn.ds.store.domains.Product;
-import vn.ds.store.validators.ProductValidator;
- 
-@Controller
-@RequestMapping("product")
-public class ProductController {
- 
- private ProductValidator validator = new ProductValidator();
- 
- @RequestMapping(value = "create", method = RequestMethod.GET)
- public String doGet(Model model) {
-  model.addAttribute("product", new Product());
-  return "createProduct";
- }
- 
- @RequestMapping(value = "save", method = RequestMethod.POST)
- public String doPost(@ModelAttribute Product product, Model model,
-   BindingResult errors,
-   @RequestParam(value = "file", required = false) MultipartFile file,
-   HttpServletRequest request) {
-  validator.validate(product, errors);
-  if (errors.hasErrors()) {
-   return "createProduct";
-  }
-  if (file != null) {
-   byte[] fileContent = null;
-   try {
-    InputStream inputStream = file.getInputStream();    
-    if (inputStream == null)
-     System.out.println("File inputstream is null");
-    // cach 1 - luu truc tiep
-    fileContent = IOUtils.toByteArray(inputStream);    
-    product.setImage(fileContent);    
-    // cach 2 - upload vao thu muc
-    String path = request.getSession().getServletContext().getRealPath("/") + "resources/upload/";
-    FileUtils.forceMkdir(new File(path));
-    File upload = new File (path + file.getOriginalFilename());
-    file.transferTo(upload);
-    String imagePath = request.getContextPath() + "/resources/upload/" + file.getOriginalFilename();
-    product.setImagePath(imagePath);
-    request.getSession().setAttribute("product", product);
-    IOUtils.closeQuietly(inputStream);
-   } catch (IOException ex) {
-    System.out.println("Error saving uploaded file");
-   }
-  }
-  ArrayList<product> lst = new ArrayList<product>();
-  lst.add(product);
-  model.addAttribute("products", lst);
-  return "listProduct";
- }
- 
- @RequestMapping(value = "/image", method = RequestMethod.GET)
- @ResponseBody
- public byte[] downloadImg(HttpServletRequest request) {
-  Product product = (Product) request.getSession()
-    .getAttribute("product");
-  if (product != null)
-   return product.getImage();
-  else
-   return null;
- }
-}
-</product></product>
 
-Ở đây, ta lưu dữ liệu vào session để lấy ra sau (thông thường là lưu vào database, ở đây đang là demo). Cách 1 ta sẽ lưu dữ liệu vào biến image bằng hàm 
-?
-1
-IOUtils.toByteArray(inputStream); 
-Sau đó ta định nghĩa một url mà để gọi đến trong src của thẻ img
-?
-1
-<img src="/product/image">
-url này chỉ gửi xuống client dữ liệu của image nên ta sử dụng @ResponseBody của spring hỗ trợ để làm việc đó (search google.com để biêt thêm chi tiết), dưới jsp ta chỉ cần gọi đến url này 
-?
-1
-<img height="200" src="${pageContext.request.contextPath}/product/image" width="300">
-Cách 2 ta sẽ coppy ảnh vào thư mục /resoures/upload để lấy đường dẫn vật lý trên server để tạo file ta dùng lệnh này: 
-?
-1
-String path = request.getSession().getServletContext().getRealPath("/") + "resources/upload/";
-và để hiển thị file trên html, thẻ img chỉ hiển thị đường dẫn internet, ta sẽ lấy đường dẫn theo lệnh sau: 
-?
-1
-String imagePath = request.getContextPath() + "/resources/upload/" + file.getOriginalFilename();
-và cuối cùng lệnh coppy data 
-?
-1
-file.transferTo(upload);
+import duy.tien.dao.EmployeeDAO;
+import duy.tien.entity.Employee;
+
+@Controller
+public class MainController {
+	
+	@Autowired
+	private EmployeeDAO employeedao;
+	
+	
+	@RequestMapping(value="/")
+	public String Home(Model model){
+		return "redirect:/home";
+	}
+	
+	
+	@RequestMapping(value="/delete", method=RequestMethod.GET)
+	public String deleteUser(@RequestParam(value="idhv", required=false)String idhv, Employee employee, ModelMap model) {
+		employee.setId(idhv);
+		employeedao.deleteUser(employee);
+		return "redirect:/home";
+	}
+	
+	@RequestMapping(value="/edit",method=RequestMethod.GET)
+	public String editUser(@RequestParam(value="idhv", required=false)String idhv,@RequestParam(value="page",required=false) Integer page, Employee employee, ModelMap model){
+		employee.setId(idhv);
+		model.addAttribute("employee", employeedao.getEdit(idhv));
+		long numPage = employeedao.countEmployee()/10;
+		model.addAttribute("numPage", numPage);
+		if(page ==null ) {
+			List<Employee> list = employeedao.getAllUser(1);
+			int pageNum = 1;
+			model.addAttribute("list", list);
+			model.addAttribute("pageNum", pageNum);
+			return "list";
+		}
+		else {
+			List<Employee> list = employeedao.getAllUser(page);
+			int pageNum = page;
+			model.addAttribute("pageNum", pageNum);
+			model.addAttribute("list", list);
+			return "list";
+		}
+	}
+	
+	@RequestMapping(value="/home", method= RequestMethod.GET)
+	public String Test(@RequestParam(value="page",required=false) Integer page, ModelMap model,HttpServletRequest req){
+		long numPage = employeedao.countEmployee()/10;
+		model.addAttribute("numPage", numPage);
+		if(page ==null ) {
+			List<Employee> list = employeedao.getAllUser(1);
+			int pageNum = 1;
+			model.addAttribute("list", list);
+			model.addAttribute("pageNum", pageNum);
+			return "list";
+		}
+		else {
+			List<Employee> list = employeedao.getAllUser(page);
+			int pageNum = page;
+			model.addAttribute("pageNum", pageNum);
+			model.addAttribute("list", list);
+			return "list";
+		}
+	}
+	
+	@RequestMapping(value="/commit", method=RequestMethod.POST)
+	public String insert(@ModelAttribute(value="user_login")Employee employee, Model model,@RequestParam(value="idhv", required=false)String userId){
+		employeedao.insertHocvien(employee);
+			return "redirect:/home";
+	}
+	
+	@RequestMapping(value="/search",method=RequestMethod.GET)
+	public String search(@RequestParam(value="id",required=false)String id,Model model){
+		System.out.println(id);
+		List<Employee> list = employeedao.getSerach(id);
+		model.addAttribute("list", list);
+		return "list";
+	}
+//	@RequestMapping(value="/home", method= RequestMethod.GET)
+//	 public String getAllUser(Model model){
+//		List<Employee> list = employeedao.getAllUser();
+//		model.addAttribute("list", list);
+//		return "list";
+//	}
+	
+}
+---------------------------------------------------------------------------------------------------------------------------
+            
+            package duy.tien.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import duy.tien.entity.Employee;
+
+
+@Transactional
+@Repository
+public class EmployeeDAO {
+	@Autowired
+	private SessionFactory sessionFactory;
+    
+	@Autowired
+	public EmployeeDAO(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Employee> getAllUser() {
+		List<Employee> list = new ArrayList<Employee>();
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Employee.class);
+		list = criteria.list();
+		return list;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Employee> getAllUser(int page) {
+		List<Employee> list = new ArrayList<Employee>();
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Employee.class);
+		if (page == 1) {
+			criteria.setFirstResult(0);
+			criteria.setMaxResults(10);
+			list = criteria.list();
+		} else {
+			criteria.setFirstResult((page - 1) * 10);
+			criteria.setMaxResults(10);
+			list = criteria.list();
+		}
+
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Employee> getSerach(String id){
+		List<Employee> list = new ArrayList<Employee>();
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Employee.class);
+		list = criteria.add(Restrictions.like("id", id+"%")).list();
+		System.out.println("Hien thi list: "+list);
+		return list;
+	}
+	
+	public void deleteUser(Employee employee) {
+		sessionFactory.getCurrentSession().delete(employee);
+		
+	}
+	public void insertHocvien(Employee employee) {
+		sessionFactory.getCurrentSession().saveOrUpdate(employee);
+	}
+
+	public Employee getHocVien(String id) {
+		return (Employee) sessionFactory.getCurrentSession().get(Employee.class, id);
+		
+	}
+	
+	public Employee getEdit(String id) {
+		return (Employee) sessionFactory.getCurrentSession().get(Employee.class, id);
+		
+	}
+
+	public Employee findUserById(String id) {
+		Employee user = (Employee) sessionFactory.getCurrentSession().load(Employee.class, id);
+		return user;
+
+
+	}
+
+	public long countEmployee() {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Employee.class);
+		criteria.setProjection(Projections.rowCount());
+		return  (Long) criteria.uniqueResult();
+	}
+}
+--------------------------------------------------------------------------------------------------------------------------------
+            package duy.tien.entity;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "employee")
+public class Employee implements Serializable{
+
+	private static final long serialVersionUID = -844141939410447932L;
+	private String id;
+	private String first_name;
+	private String last_name;
+	private String email;
+	private String phone;
+	private String dob;
+
+	@Id
+	@Column(name="id")
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	@Column(name="first_name")
+	public String getFirst_name() {
+		return first_name;
+	}
+
+	public void setFirst_name(String first_name) {
+		this.first_name = first_name;
+	}
+
+	@Column(name="last_name")
+	public String getLast_name() {
+		return last_name;
+	}
+
+	public void setLast_name(String last_name) {
+		this.last_name = last_name;
+	}
+
+	@Column(name="email")
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	@Column(name="phone")
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	@Column(name="dob")
+	public String getDob() {
+		return dob;
+	}
+
+	public void setDob(String dob) {
+		this.dob = dob;
+	}
+
+	public Employee() {
+		super();
+	}
+
+	public Employee(String id, String first_name, String last_name, String email, String phone, String dob) {
+		super();
+		this.id = id;
+		this.first_name = first_name;
+		this.last_name = last_name;
+		this.email = email;
+		this.phone = phone;
+		this.dob = dob;
+	}
+
+}
+--------------------------------------------------------------------------------------------------------------------------
+            
+            <%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Danh sách</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+<a href="search?id=12">Search</a>
+                <div align="right" class="form-group">
+					User:<label>${username}</label>
+					<a href="logout"><u>Logout</u></a>
+				</div>
+ <div style="border: 1px solid #ccc; padding: 20px">
+ <div class="container">
+  <h2>Update or Insert</h2>
+  <form:form class="form-horizontal" action="commit" method="post" modelAttribute="user_login">
+    <div class="form-group">
+      <label>Id:</label>
+      <input type="text" class="form-control" name="id" id="id1" placeholder="Id" value="${employee.id }">
+    </div>
+    
+    <div class="form-group">
+      <label>First Name:</label>
+      <input type="text" class="form-control" name="first_name" placeholder="Enter First Name" value="${employee.first_name }">
+    </div>
+    
+    <div class="form-group">
+      <label>Last_name:</label>
+      <input type="text" class="form-control" name="last_name" placeholder="Enter Last Name" value="${employee.last_name }">
+    </div>
+    
+    <div class="form-group">
+      <label>Email:</label>
+      <input type="text" class="form-control" name="email" placeholder="Enter Email" value="${employee.email }">
+    </div>
+    
+    <div class="form-group">
+      <label>Phone:</label>
+      <input type="text" class="form-control" name="phone" placeholder="Enter Phone" value="${employee.phone }">
+    </div>
+    
+    <div class="form-group">
+      <label>DOB:</label>
+      <input type="date" class="form-control" name="dob" placeholder="Enter DOB" value="${employee.dob }">
+    </div>
+    
+    <div align="center"><button type="submit" class="btn btn-default">Commit (Add or Update)</button></div>
+ </form:form>
+</div>
+</div>
+
+   <div style="border: 1px solid #ccc; padding: 20px">
+   <div class="container">
+  <h2>Basic Table</h2>     
+  <table class="table">
+    <thead>
+      <tr>
+       <th>No</th>
+	    <th>Id</th>
+		<th>First Name</th>
+		<th>Last Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>DOB</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+    <c:forEach var="list" items="${list}" varStatus="status">
+      <tr>
+        <td>${status.index+1+(pageNum-1)*10}</td>
+        <td>${list.id}</td>
+		<td>${list.first_name}</td>
+		<td>${list.last_name}</td>
+		<td>${list.email}</td>
+		<td>${list.phone}</td>
+		<td>${list.dob}</td>
+        <th><a href="edit?idhv=${list.id}&page=${pageNum}"><button type="button" class="btn btn-success">Sửa</button></a>&nbsp;&nbsp;&nbsp;<a href="delete?idhv=${list.id}"><button type="button" class="btn btn-danger">Xóa</button></a></th>
+      </tr>
+      </c:forEach>
+    </tbody>
+  </table>
+</div>
+
+<div class="row" style="text-align: center;">
+					<ul class="pagination">
+						<li id="firstPage"><a
+							href="${pageContext.request.contextPath}/home?page=1"><<</a></li>
+						<c:if test="${pageNum>1 }">
+							<li><a id="prev" class="btn btn-default"
+								href="${pageContext.request.contextPath}/home?page=${pageNum-1}"><</a>
+							</li>
+						</c:if>
+						<c:if test="${pageNum==1 }">
+							<li><a class="btn btn-default" href="" disabled="true"><</a>
+							</li>
+						</c:if>
+						<c:forEach var="i" begin="1" end="${numPage+1}">
+							<li id="${i }"><a
+								href="${pageContext.request.contextPath}/home?page=${i }">${i}</a></li>
+						</c:forEach>
+
+						<li id="next"><a
+							href="${pageContext.request.contextPath}/home?page=${pageNum+1}">></a></li>
+						<li id="lastPage"><a
+							href="${pageContext.request.contextPath}/home?page=${numPage+1}">>></a></li>
+
+					</ul>
+					<c:if test='${role == "G_001"}'>
+						<div class="col-md-2 pull-right">
+							<button id="myBtn" type="button" class="btn btn-primary">New
+								Account</button>
+						</div>
+					</c:if>
+				</div>
+</div>
+</body>
+</html>
+----------------------------------------------------------------------------------------------------------------------------
+
+# DataSource
+
+ds.database-driver=com.mysql.jdbc.Driver
+ds.url=jdbc:mysql://localhost:3306/102120265
+ds.username=root
+ds.password=root
