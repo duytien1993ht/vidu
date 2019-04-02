@@ -1,0 +1,14 @@
+@Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		// TODO Auto-generated method stub
+		response.setContentType("application/json");
+		response.setCharacterEncoding("utf-8");
+		UserForm userForm = (UserForm) form;
+		userForm.setVl1("nhi");
+		PrintWriter out = response.getWriter();
+		Gson gson = new Gson();
+		String json =gson.toJson(userForm);
+		out.print(json);
+		return null;
+}
