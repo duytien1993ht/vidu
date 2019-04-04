@@ -80,3 +80,33 @@ public class HomeController {
 		return "redirect:/person/";
 	}
 }
+------------------------------------------------------------------------------------------------------
+---> list person
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Person List</title>
+</head>
+<body>
+ <div>
+   <a th:href = "@{addPerson}">Add Person</a>
+   <table border="1">
+     <tr>
+       <td>First Name</td>
+       <td>Last Name</td>
+       <td>#</td>
+     </tr>
+     <tr th:each = "person : ${persons}">
+       <td th:utext = "${person.firstName}"></td>
+       <td th:utext = "${person.lastName}"></td>
+       <td>
+         <a th:href = @{showUpdate/}+${person.firstName}>Update</a>|
+         <a th:href = @{delete/}+${person.firstName}>Delete</a>
+       </td>
+     </tr>
+   </table>
+ </div>
+</body>
+</html>
