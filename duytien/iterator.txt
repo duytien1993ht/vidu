@@ -1,0 +1,5 @@
+for(Iterator<Person> person = persons.iterator(); person.hasNext();) {
+			if (firstName.equals(person.next().getFirstName())) {
+				person.remove();
+			}
+		}
