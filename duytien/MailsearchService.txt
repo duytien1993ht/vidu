@@ -29,6 +29,17 @@ public class MailsearchService {
     }
 
 }
+-----------------------------------------------------------------------------------------
+
+@RequestMapping("/paging")
+    public String paging(String mailAddress
+            , @PageableDefault(size = 2, page = 0) Pageable pageable
+            , Model model) {
+        SelectOptions options = SelectOptionsUtils.get(pageable, true);
+        List<UserInfo> userInfoList = userInfoDao.selectByMailAddress(mailAddress, options);
+        model.addAttribute("userInfoList", userInfoList);
+        return "sample/sample";
+    }
 
 ------------------------------------------------------------------------------------------
 
