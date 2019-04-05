@@ -55,3 +55,10 @@ SelectOptions options = SelectOptions.get();
 SelectOptions options = SelectOptions.get().offset(5).limit(10);
 EmployeeDao dao = new EmployeeDao();
 List<Employee> list = dao.selectByDepartmentName("ACCOUNT", options);
+
+---------------------------------------------------------------------------------------------
+
+@DateTimeFormat(pattern = "yyyy-mm-dd hh:mm:ss")
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "date_start")
+	private Date startDate;
