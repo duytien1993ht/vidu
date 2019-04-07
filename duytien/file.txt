@@ -1,0 +1,118 @@
+@RequestMapping(value="/saveupload", method=RequestMethod.POST)
+	public String saveUpload(@RequestParam("file") MultipartFile file, Model model) {
+		if (file.isEmpty()) {
+			model.addAttribute("message", "Please select a file and try again");
+			return "status";
+		}
+		String pathFolder = environment.getRequiredProperty("file_path");
+		System.out.println("Ten file: "+file.getOriginalFilename()+", kieu file: "+file.getContentType());
+		try {
+			byte[] bytes = file.getBytes();
+			Path path = Paths.get(pathFolder+file.getOriginalFilename());
+			String name = file.getOriginalFilename();
+			String typeFile = file.getContentType();
+			Files.write(path, bytes);
+			
+			fileRepository.save(new File(name,pathFolder,typeFile));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "redirect:/display";
+	}
+  
+  ------------------------------------------------------------------------------------------------------------
+  
+  @RequestMapping(value="/download/{id}")
+	public void download(@PathVariable("id") int id,HttpServletResponse response) {
+		try {
+			File fi = fileRepository.findById(id);
+			String a = fi.getPathFile()+"/"+fi.getName();
+			java.io.File file = ResourceUtils.getFile(a);
+			byte[] data = FileUtils.readFileToByteArray(file);
+			// Thiết lập thông tin trả về
+		    response.setContentType("application/octet-stream");
+		    response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
+		    response.setContentLength(data.length);
+		    
+		    InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
+		    FileCopyUtils.copy(inputStream, response.getOutputStream());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+  
+  -----------------------------------------------------------------------------------------------------------------
+  
+@Entity
+@Table(name="file")
+public class File implements Serializable {
+ 
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue
+	@Column(name="id")
+	private int id;
+	
+	@Column(name="name")
+	private String name;
+	
+	@Column(name="path_file")
+	private String pathFile;
+	
+	@Column(name="type_file")
+	private String typeFile;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPathFile() {
+		return pathFile;
+	}
+
+	public void setPathFile(String pathFile) {
+		this.pathFile = pathFile;
+	}
+
+	public String getTypeFile() {
+		return typeFile;
+	}
+
+	public void setTypeFile(String typeFile) {
+		this.typeFile = typeFile;
+	}
+
+	public File() {
+		super();
+	}
+	
+	public File(int id, String name, String pathFile, String typeFile) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.pathFile = pathFile;
+		this.typeFile = typeFile;
+	}
+
+	public File(String name, String pathFile, String typeFile) {
+		super();
+		this.name = name;
+		this.pathFile = pathFile;
+		this.typeFile = typeFile;
+	}
+	
+}
