@@ -46,14 +46,14 @@ $('input[type=radio][name=sex]').change(function(){
           } 
  	  }); 
 
-	    if($('#form1').valid()) {
+	$('input').on('blur keyup', function() {
+	   if($('#form1').valid()) {
 	   	  $('#form1').submit();
-	   	  alert("Gi vay");
-	   	  $('#submit').removeAttr('disabled');
+	   	  $('#submit').prop('disabled', false);
 	   } else {
-	   	   alert("Gi ki vay");
-	   	   $('#submit').attr('disabled', 'disabled');
+	   	   $('#submit').prop('disabled', 'disabled');
 	   }
+	  });
        
         $("form :input").change(function() {
          $(this).closest('form').data('changed', true);
