@@ -69,3 +69,14 @@ $('input[type=radio][name=sex]').change(function(){
 	   });
 
    });
+   
+   ------------------------------------------------------------------------------------------------------
+   
+   @RequestMapping(value="/editEnabled",method=RequestMethod.GET)
+	@ResponseBody
+	public boolean getEnabled(HttpServletRequest request) {
+		long id= Integer.parseInt(request.getParameter("id"));
+		boolean enabled = Boolean.parseBoolean(request.getParameter("enabled"));
+		adminService.updateEnabled(enabled, id);
+		return enabled;
+	}
