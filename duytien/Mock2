@@ -7,3 +7,65 @@ $('input[type=radio][name=sex]').change(function(){
    	   });
        
 ------------------------------------------------------------------------------------------------------------
+
+ $('#form1').validate({
+ 		  rules:{
+ 			  email:{
+ 				required: true
+ 			  },
+ 			  password:{
+ 				  required: true
+ 			  },
+ 			  chon:{
+ 			  	valueNotEquals:"default"
+ 			  },
+              date:{
+              	date: true,
+              	validDate:true,
+              	required:true
+              }
+ 		  },
+ 		  messages:{
+ 			  email:{
+ 				  required:'Email khong duoc de trong'
+ 			  },
+ 			  password:{
+ 				  required:'password khong duoc de trong'
+ 			  }
+ 		  },
+ 		   highlight: function(element, errorClass, validClass) {
+                   //$(element).addClass('mau').removeClass('validClass');
+                    $(element).addClass('mau');
+
+            },
+           unhighlight: function(element, errorClass, validClass) {
+                    $(element).removeClass('mau');
+           },
+ 		  invalidHandler: function(e){
+
+          } 
+ 	  }); 
+
+	    if($('#form1').valid()) {
+	   	  $('#form1').submit();
+	   	  alert("Gi vay");
+	   	  $('#submit').removeAttr('disabled');
+	   } else {
+	   	   alert("Gi ki vay");
+	   	   $('#submit').attr('disabled', 'disabled');
+	   }
+       
+        $("form :input").change(function() {
+         $(this).closest('form').data('changed', true);
+        });
+
+	   $('#vd').click(function(e){
+	   	   e.preventDefault();
+	   	   if($(this).closest('form').data('changed')) {
+             alert("Form da thay doi");
+          } else {
+          	 alert("Form chua thay doi");
+          }
+	   });
+
+   });
