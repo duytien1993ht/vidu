@@ -1,0 +1,9 @@
+$('input[type=radio][name=sex]').change(function(){
+   	   	 if($(this).val()=='0') {
+   	   	 	$('input[type=text][name=password]').attr('disabled',true);
+   	   	 } else {
+   	   	 	$('input[type=text][name=password]').removeAttr('disabled');
+   	   	 }
+   	   });
+       
+------------------------------------------------------------------------------------------------------------
