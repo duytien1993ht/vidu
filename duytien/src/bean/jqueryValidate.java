@@ -224,18 +224,21 @@ $(document).ready(function(){
   // Validate danh sach table
   
   $(document).ready(function(){
-    	   
+    	   // kiem tra gia tri cac hang co giong nhau hay khong
     	   $.validator.addMethod('duplicate',function(value,element){
     		   var acc = [];
     		   var check = true;
     		   if(value.trim() != ""){
     			   $("#myTable tbody tr").each(function(index){
                        var a = $(this).find("td:nth-child(2) input[type='text']").val();
+                       // neu == gia tri va chua co trong mang
                        if(value == a && acc.indexOf(a) < 0) {
                            acc.push(a);
                        }
+                       // neu == gia tri va da co trong mang
                        else if(value == a && acc.indexOf(a) >= 0) {
                            check = false;
+                           // thoat vong lap each
                            return false;
                        }
                    });
@@ -284,6 +287,7 @@ $(document).ready(function(){
                    
                    $(this).find("td:nth-child(2) input[type='text']").rules('add', {
                        required: function(){
+                    	   // kiem tra so phan tu kieu String trong mang co >0 va <2
                     	   return (arr2.filter(String).length > 0 && arr2.filter(String).length < 2);
                        },
                        duplicate:true,
@@ -291,7 +295,7 @@ $(document).ready(function(){
                        messages: {
                            required: "Dong "+index+" cot 1 : Enter Reg Number",
                            duplicate: function(params,element){
-                        	   return "Dong so "+$(element).parents("tr").index()+" bi trung lap ";
+                        	   return "Dong so "+($(element).parents("tr").index()+1)+" bi trung lap ";
                            },
                            minlength: "Dong "+index+" cot 1 : Enter at least {0} characters",
                        }
