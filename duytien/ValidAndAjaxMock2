@@ -1,3 +1,4 @@
+// dieu huong theo gia tri radio
 $('input[type=radio][name=sex]').change(function(){
    	   	 if($(this).val()=='0') {
    	   	 	$('input[type=text][name=password]').attr('disabled',true);
@@ -46,29 +47,34 @@ $('input[type=radio][name=sex]').change(function(){
           } 
  	  }); 
 
+        // check validate
 	$('input').on('blur keyup', function() {
+	   // Các điều kiện đều đã hợp lệ
 	   if($('#form1').valid()) {
 	   	  $('#form1').submit();
 	   	  $('#submit').prop('disabled', false);
+           // vẫn còn lỗi đầu vào
 	   } else {
 	   	   $('#submit').prop('disabled', 'disabled');
 	   }
 	  });
        
+        // các thao tác trong form đã bị thay đổi
         $("form :input").change(function() {
          $(this).closest('form').data('changed', true);
         });
 
+           // kiem tra xem form đã thay đổi hay chưa
 	   $('#vd').click(function(e){
-	   	   e.preventDefault();
-	   	   if($(this).closest('form').data('changed')) {
-             alert("Form da thay doi");
-          } else {
-          	 alert("Form chua thay doi");
-          }
+	   	e.preventDefault();
+	   	if($(this).closest('form').data('changed')) {
+                  alert("Form da thay doi");
+                } else {
+          	  alert("Form chua thay doi");
+                }
 	   });
 
-   });
+       });
    
    ------------------------------------------------------------------------------------------------------
    
