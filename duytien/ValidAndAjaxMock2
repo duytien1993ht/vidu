@@ -6,6 +6,19 @@ $('input[type=radio][name=sex]').change(function(){
    	   	 	$('input[type=text][name=password]').removeAttr('disabled');
    	   	 }
    	   });
+	   
+C2: javascript
+ var rad = document.form1.sex;
+       var prev = null;
+       for (var i = 0; i < rad.length; i++) {
+          rad[i].addEventListener('change', function() {
+             if(this.value == '0') {
+             	document.getElementsByName("password")[0].disabled = true;
+             } else {
+             	document.getElementsByName("password")[0].removeAttribute('disabled');
+             }
+          });
+        }
        
 ------------------------------------------------------------------------------------------------------------
 
