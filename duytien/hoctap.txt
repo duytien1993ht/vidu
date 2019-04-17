@@ -8,3 +8,5 @@ https://www.baeldung.com/spring-thymeleaf-pagination
 https://www.logicbig.com/tutorials/spring-framework/spring-data/pagination-with-thymeleaf.html
 // validate annotation
 https://spring.io/guides/gs/validating-form-input/
+// các hàm trong validate
+https://jqueryvalidation.org/validate/#toptions
