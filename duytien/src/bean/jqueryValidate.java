@@ -168,11 +168,11 @@ $(document).ready(function(){
                 },
                 errorClass:"validationError",
                 highlight: function(element, errorClass, validClass) {
-                   // $(element).addClass(errorClass).removeClass('validClass');
+                   // $(element).addClass(errorClass).removeClass(validClass);// nếu dùng bắt buộc khai báo errorClass, validClass
                     $(element).addClass('mau');
                 },
                 unhighlight: function(element, errorClass, validClass) {
-                   // $(element).removeClass(errorClass).addClass('validClass');
+                   // $(element).removeClass(errorClass).addClass(validClass);
                     $(element).removeClass('mau');
                 },
                 errorPlacement: function(error,element) {
@@ -184,8 +184,8 @@ $(document).ready(function(){
                   if (errors) {
                     $('.message-error').show();
                     var length = validator.errorList.length;                   
-                    //validator.errorList[length-1].element.focus(); 
-                    //validator.errorList[0].element.focus(); 
+                    //validator.errorList[length-1].element.focus(); // chỉ định phần tử cuối cùng sẽ focus khi có lỗi
+                    //validator.errorList[0].element.focus(); // chỉ định phần tử đầu tiên sẽ focus khi có lỗi
                     $('.message-error ul').empty();
                   }
                 },
