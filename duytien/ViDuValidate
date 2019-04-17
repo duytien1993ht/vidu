@@ -4,16 +4,16 @@ $.extend( $.validator, {
 		messages: {},
 		groups: {},
 		rules: {},
-		errorClass: "error",
+		errorClass: "error",// add class cho message lỗi
 		pendingClass: "pending",
 		validClass: "valid",
 		errorElement: "label",
-		focusCleanup: false,
-		focusInvalid: true,
+		focusCleanup: false,// mặc định false, nếu được bật sẽ xóa thông báo lỗi cho một phần tử khi người dùng tập trung vào nó
+		focusInvalid: true,// focus phần tử đầu tiên hoặc cuối cùng bị lỗi, false sẽ không focus
 		errorContainer: $( [] ),
 		errorLabelContainer: $( [] ),
 		onsubmit: true,
-		ignore: ":hidden",
+		ignore: ":hidden",// loại bỏ đối tượng cần validate, ignores all elements with the class "ignore" when validating.
 		ignoreTitle: false,
 		onfocusin: function( element ) {
 			this.lastActive = element;
@@ -26,12 +26,12 @@ $.extend( $.validator, {
 				this.hideThese( this.errorsFor( element ) );
 			}
 		},
-		onfocusout: function( element ) {
+		onfocusout: function( element ) {// onfocusout xác thực mỗi khi người dùng rời khỏi trường, mặc định true
 			if ( !this.checkable( element ) && ( element.name in this.submitted || !this.optional( element ) ) ) {
 				this.element( element );
 			}
 		},
-		onkeyup: function( element, event ) {
+		onkeyup: function( element, event ) {// onkeyup xác thực mỗi khi người dùng nhập vào, mặc định true
 
 			// Avoid revalidate the field when pressing one of the following keys
 			// Shift       => 16
@@ -58,7 +58,7 @@ $.extend( $.validator, {
 				this.element( element );
 			}
 		},
-		onclick: function( element ) {
+		onclick: function( element ) {//Validate checkboxes, radio buttons, and select elements on click. Set to false to disable.
 
 			// Click on selects, radiobuttons and checkboxes
 			if ( element.name in this.submitted ) {
