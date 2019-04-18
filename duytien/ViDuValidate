@@ -1,3 +1,18 @@
+$('form').validate({
+    errorContainer: "#messageBox1",
+    errorLabelContainer: "#messageBox1 ul",
+    wrapper: "li"
+});
+
+<div id="messageBox1">                 <!- errorContainer ->
+    <ul>                               <!- errorLabelContainer ->
+        <li>Field is required</li>     <!- wrapper ->
+        <li>Enter a valid email</li>   <!- wrapper ->
+    </ul>
+</div>
+
+-----------------------------------------------------------------------------------------------------------------------
+
 $.extend( $.validator, {
 
 	defaults: {
@@ -7,7 +22,7 @@ $.extend( $.validator, {
 		errorClass: "error",// add class cho message lỗi
 		pendingClass: "pending",
 		validClass: "valid",
-		errorElement: "label",
+		errorElement: "label",// mặc định label, sử dụng phần tử tạo thông báo lỗi
 		focusCleanup: false,// mặc định false, nếu được bật sẽ xóa thông báo lỗi cho một phần tử khi người dùng tập trung vào nó
 		focusInvalid: true,// focus phần tử đầu tiên hoặc cuối cùng bị lỗi, false sẽ không focus
 		errorContainer: $( [] ),
