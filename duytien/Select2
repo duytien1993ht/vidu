@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.min.js"></script>
+<select class="js-select1" id="select1" name="state">
+    <option value="AL">Alabama</option>
+</select>
+$(document).ready(function() {
+    	    $('.js-select1').select2();
+    	    $(document).on('keyup', '.select2-search__field', function (e) {    
+    	        if($(this).val().length >=2 ) {
+    	           $('#select1').empty();
+    	           var data = $(this).val();
+    	           $.ajax({
+    	        	  data : {'value':data},
+    	        	  dataType: 'json',
+    	        	  url : 'selectAjax'
+    	           }).done(function(data){
+    	        	   $.each(data,function(i,v){
+    	        		   console.log(this.firstName);
+    	        		   var option = new Option(this.firstName,this.lastName);
+    	        		   $('#select1').append(option).trigger('change');
+    	        	   });
+    	           });
+    	        }
+    	    });
+    	});
