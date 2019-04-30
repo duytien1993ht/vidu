@@ -28,7 +28,7 @@ $.extend( $.validator, {
 		errorContainer: $( [] ),
 		errorLabelContainer: $( [] ),
 		onsubmit: true,
-		ignore: ":hidden",// loại bỏ đối tượng cần validate, ignores all elements with the class "ignore" when validating.
+		ignore: ":hidden",// loại bỏ validate type hidden, ignores all elements with the class "ignore" when validating.
 		ignoreTitle: false,
 		onfocusin: function( element ) {
 			this.lastActive = element;
