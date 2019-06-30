@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+<h2>Spring MVC Multiple Row Form Submit example</h2>
+<form method="post" th:action="@{save}" th:object = "${contactForm}">
+	<table id = "mytable">
+	<tr>
+		<th>No.</th>
+		<th>Name</th>
+		<th>Lastname</th>
+		<th>Email</th>
+		<th>Phone</th>
+	</tr>
+		<tr th:each = "contact,status : *{contacts}">
+			<td align="center" th:text = "${status.count}"></td>
+			<td><input th:field ="*{contacts[__${status.index}__].firstname}"/>
+			  <span th:if = "${#fields.hasErrors('contacts[__${status.index}__].firstname')}" th:errors="*{contacts[__${status.index}__].firstname}">Xin chao</span>
+			</td>
+			<td><input th:field ="*{contacts[__${status.index}__].lastname}"/></td>
+			<td><input th:field ="*{contacts[__${status.index}__].email}"/></td>
+			<td><input th:field ="*{contacts[__${status.index}__].phone}"/></td>
+		</tr>
+</table>	
+<br/>
+<a th:href="@{/}">Back</a>
+<input type="submit" value="Save" id = "btncommit"/>
+	
+</form>
+<script type="text/javascript">
+   $(document).ready(function(){
+	   $('#btncommit').click(function(e){
+		   e.preventDefault();
+		   var id = new Array();
+		   var name = new Array();
+		   id.push('001');
+		   id.push('002');
+		   name.push('tien1');
+		   name.push('tien2');
+		   var date = '1993/02/03';
+		   var array = {};
+		   array['id'] = id;
+		   array['name'] = name;
+		   array['date'] = date;
+		   $.ajax({
+           	method:'POST',
+           	url:'commit',
+           	contentType: 'application/json; charset=utf-8',
+           	data: JSON.stringify(array),
+           	success:function(data){
+           		alert(data);
+           	},
+           	error:function(xhr, ajaxOptions, thrownError){
+           		if(xhr.status==500){
+           			alert(thrownError);
+           		}
+           	}
+           });
+	   });
+   });
+</script>
+
+</body>
+</html>
+
+--------------------------------------------------------------------------------------------------------------
+
+package org.o7planning.thymeleaf.controller;
+
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.o7planning.thymeleaf.form.ContactForm;
+import org.o7planning.thymeleaf.form.PersonForm;
+import org.o7planning.thymeleaf.model.Contact;
+import org.o7planning.thymeleaf.model.Person;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.google.gson.Gson;
+ 
+@RestController
+public class MainController {
+ 
+    private static List<Person> persons = new ArrayList<Person>();
+ 
+    static {
+        persons.add(new Person("Bill", "Gates"));
+        persons.add(new Person("Steve", "Jobs"));
+    }
+    
+    private static List<Contact> contacts = new ArrayList<Contact>();
+
+	static {
+		contacts.add(new Contact("Barack", "Obama", "barack.o@whitehouse.com", "147-852-965"));
+		contacts.add(new Contact("George", "Bush", "george.b@whitehouse.com", "785-985-652"));
+		contacts.add(new Contact("Bill", "Clinton", "bill.c@whitehouse.com", "236-587-412"));
+		contacts.add(new Contact("Ronald", "Reagan", "ronald.r@whitehouse.com", "369-852-452"));
+	}
+ 
+    // Được tiêm vào (inject) từ application.properties.
+    @Value("${welcome.message}")
+    private String message;
+ 
+    @Value("${error.message}")
+    private String errorMessage;
+ 
+    @RequestMapping(value = { "/", "/index" }, method = RequestMethod.GET)
+    public String index(Model model) {
+        model.addAttribute("message", message);
+        return "index";
+    }
+ 
+    @RequestMapping(value = { "/personList" }, method = RequestMethod.GET)
+    public String personList(Model model) {
+ 
+        model.addAttribute("persons", persons);
+ 
+        return "personList";
+    }
+ 
+    @RequestMapping(value = { "/addPerson" }, method = RequestMethod.GET)
+    public String showAddPersonPage(Model model) {
+ 
+        PersonForm personForm = new PersonForm();
+        model.addAttribute("personForm", personForm);
+ 
+        return "addPerson";
+    }
+ 
+    @RequestMapping(value = { "/addPerson" }, method = RequestMethod.POST)
+    public String savePerson(Model model,
+           @Valid @ModelAttribute("personForm") PersonForm personForm,
+           BindingResult bindingResult) {
+    	if(bindingResult.hasErrors()) {
+    		return "addPerson";
+    	}
+ 
+        String firstName = personForm.getFirstName();
+        String lastName = personForm.getLastName();
+ 
+        if (firstName != null && firstName.length() > 0 //
+                && lastName != null && lastName.length() > 0) {
+            Person newPerson = new Person(firstName, lastName);
+            persons.add(newPerson);
+ 
+            return "redirect:/personList";
+        }
+ 
+        model.addAttribute("errorMessage", errorMessage);
+        return "addPerson";
+    }
+    
+    @RequestMapping(value = "/showAddList", method = RequestMethod.GET)
+	public ModelAndView get(@ModelAttribute ContactForm contactForm) {
+		contactForm.setContacts(contacts);		
+		return new ModelAndView("showAddList");
+	}
+    
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public ModelAndView saveBooks(Model model, @Valid @ModelAttribute("contactForm") ContactForm form,
+    		BindingResult bindingResult) {
+    	if(bindingResult.hasErrors()) {
+    		List<FieldError> errors = bindingResult.getFieldErrors();
+    	    for (FieldError error : errors ) {
+    	        System.out.println (error.getObjectName() + " - " + error.getDefaultMessage()+" , "+error.getField());
+    	    }
+    		return new ModelAndView("showAddList");
+    	}
+        return new ModelAndView("redirect:/showAddList");
+    }
+    
+    @RequestMapping(value="/selectAjax",method=RequestMethod.GET)
+	public @ResponseBody String getStatus(HttpServletRequest request) {
+		String data = request.getParameter("value");
+		Gson gson = new Gson();
+		String json =gson.toJson(persons);
+		return json;
+	}
+    
+	@RequestMapping(value="/commit",method=RequestMethod.POST)
+	@ResponseBody
+	public String commit(@Valid @RequestBody ContactForm contactForm, BindingResult result) {
+		if(result.hasErrors()) {
+			return "error";
+		}
+		IntStream.range(0, contactForm.getId().size()).forEach(index -> {
+			System.out.print(contactForm.getId().get(index)+" -> ");
+			System.out.println(contactForm.getName().get(index));
+		});
+		return "success";
+	}
+ 
+}
